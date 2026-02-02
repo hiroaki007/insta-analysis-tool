@@ -12,7 +12,7 @@ GitPython==3.1.46
 idna==3.11
 ImageIO==2.37.2
 imageio-ffmpeg==0.6.0
-instagrapi==2.2.1
+instagrapi
 Jinja2==3.1.6
 jsonschema==4.26.0
 jsonschema-specifications==2025.9.1
@@ -27,7 +27,7 @@ proglog==0.1.12
 protobuf==6.33.5
 pyarrow==23.0.0
 pycryptodomex==3.23.0
-pydantic==2.12.5
+pydantic
 pydantic_core==2.41.5
 pydeck==0.9.1
 PySocks==1.7.1
