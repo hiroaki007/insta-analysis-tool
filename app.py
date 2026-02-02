@@ -17,6 +17,37 @@ def get_client():
     cl.login(USERNAME, PASSWORD)
     return cl
 
+# --- パスワード認証機能 ---
+# .envから設定したパスワードを取得
+# 第2引数は、万が一.envに書き忘れた時の「予備」として機能します
+
+MASTER_PASSWORD = os.getenv("APP_ACCESS_PASSWORD", "default_pass")
+
+def check_password():
+    """パスワードが正しいかチェックする関数"""
+    if "password_correct" not in st.session_state:
+        st.session_state["password_correct"] = False
+
+    if st.session_state["password_correct"]:
+        return True
+
+    # パスワード入力画面
+    st.title("🔐 Client Access Only")
+    password = st.text_input("アクセスパスワードを入力してください", type="password")
+    if st.button("ログイン"):
+        if password == MASTER_PASSWORD:
+            st.session_state["password_correct"] = True
+            st.rerun()
+        else:
+            st.error("パスワードが違います")
+    return False
+
+# 認証が通らない場合は、ここで処理を止める
+if not check_password():
+    st.stop()
+
+
+# --- ここから下に、これまでのアプリのメインコードを書く ---
 st.title("📸 インスタリサーチ＆ダッシュボード")
 
 col1, col2 = st.columns([1, 2])
