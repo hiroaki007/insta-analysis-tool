@@ -33,67 +33,76 @@ if start_btn:
     else:
         try:
             cl = get_client()
-            with st.spinner(f"{target_id}のデータを解析中..."):
-                user_info = cl.user_info_by_username_v1(target_id)
-                user_id = user_info.pk
+            # 入力されたIDをカンマで分割してリストにする（空白は除去）
+            target_list = [i.strip() for i in target_id.split(",")]
+            
+            all_posts = [] # 全員のデータを貯める箱
 
-                result = cl.private_request(f"feed/user/{user_id}/", params={"count": count})
-                items = result.get("items", [])
+            for target in target_list:
+                with st.spinner(f"{target} のデータを取得中..."):
+                    # ID取得
+                    user_info = cl.user_info_by_username_v1(target)
+                    user_id = user_info.pk
+                    
+                    # 投稿取得
+                    result = cl.private_request(f"feed/user/{user_id}/", params={"count": count})
+                    items = result.get("items", [])
+                    
+                    for item in items:
+                        caption = item.get("caption") or {}
+                        image_url = item.get("thumbnail_url") or (item.get("image_versions2") or {}).get("candidates", [{}])[0].get("url")
+                        
+                        all_posts.append({
+                            "アカウント": target, # 誰の投稿か判別用
+                            "URL": f"https://www.instagram.com/p/{item.get('code')}/",
+                            "画像URL": image_url,
+                            "いいね数": item.get("like_count", 0),
+                            "コメント数": item.get("comment_count", 0),
+                            "本文": caption.get("text", "").replace("\n", ' ')[:50]
+                        })
+                    time.sleep(2) # 連続アクセスでブロックされないための休憩
 
-                posts = []
-                for item in items:
-                    caption = item.get("caption") or {}
-
-                    # 画像URLを取得（リール動画の場合はサムネイルを取得）
-                    image_url = item.get("thumbnail_url") or (item.get("image_versions2") or {}).get("candidates", [{}])[0].get("url")
-
-                    posts.append({
-                        "URL": f"https://www.instagram.com/p/{item.get('code')}/",
-                        "画像URL": image_url, # これを追加！
-                        "いいね数": item.get("like_count", 0),
-                        "コメント数": item.get("comment_count", 0),
-                        "本文": caption.get("text", "").replace("\n", ' ')[:50]
-                    })
-                
-                # (前略：データ整形のループが終わったあと)
-                df = pd.DataFrame(posts)
-
-                # いいね数が多い順に並び替える方法
-
-                df = df.sort_values(by="いいね数", ascending=False)
-
-                # バズり分析 (修正済)
-                avg_likes = df["いいね数"].mean()
-                df["判定"] = df["いいね数"].apply(lambda x: "🔥バズり" if x > avg_likes * 1.5 else "")
+            df = pd.DataFrame(all_posts)
+            
+            # 並び替え（全体の中でいいねが多い順）
+            df = df.sort_values(by="いいね数", ascending=False)
+            avg_likes = df["いいね数"].mean()
+            df["判定"] = df["いいね数"].apply(lambda x: "🔥バズり" if x > avg_likes * 1.5 else "")
 
             with col2:
-                st.header("分析結果")
-                st.metric("平均いいね数", f"{avg_likes:.1f}")
-                
-                # グラフの追加
-                # --- 追加：上位3件の画像を表示 ---
-                st.subheader("🔥 TOP3 投稿のビジュアル")
-                top_posts = df.head(3) # 上位3件を抜き出す
-                
-                # 3つの列を作って横並びにする
-                img_cols = st.columns(3)
-                for idx, row in enumerate(top_posts.itertuples()):
-                    with img_cols[idx]:
-                        if row.画像URL:
-                            st.image(row.画像URL, caption=f"いいね: {row.いいね数}")
-                # ------------------------------
-                
-                st.subheader("📊 いいね数の推移（折れ線）")
-                st.line_chart(df.set_index("URL")["いいね数"])
+                st.header("分析レポート")
 
+                # タブを作成して表示を分ける
+                tab1, tab2, tab3 = st.tabs(["📊 比較分析", "📜 投稿一覧", "🔥 バズビジュアル"])
 
-                st.dataframe(df, use_container_width=True)
+                with tab1:
+                    st.subheader("アカウント別・平均いいね比較")
+                    comparison_df = df.groupby("アカウント")["いいね数"].mean()
+                    st.bar_chart(comparison_df)
+                    
+                    st.subheader("投稿順のいいね推移")
+                    # indexをリセットして全体の推移を見やすくする
+                    st.line_chart(df["いいね数"])
 
+                with tab2:
+                    st.subheader("全投稿データ一覧")
+                    # どのアカウントの投稿か分かる状態で表を表示
+                    st.dataframe(df, use_container_width=True)
+                    
+                    # ダウンロードボタンもここに配置
+                    csv = df.to_csv(index=False, encoding="utf-8-sig").encode('utf-8-sig')
+                    st.download_button("CSVを保存", data=csv, file_name="all_research_res.csv")
 
-
-                # ダウンロードボタン (修正済)
-                csv = df.to_csv(index=False, encoding="utf-8-sig").encode('utf-8-sig')
-                st.download_button("結果をCSVで保存", data=csv, file_name=f"{target_id}_res.csv")
-
+                with tab3:
+                    st.subheader("全体の上位投稿")
+                    top_posts = df.head(6) # せっかくなので上位6件表示
+                    
+                    # 3列×2段で表示する工夫
+                    cols = st.columns(3)
+                    for idx, row in enumerate(top_posts.itertuples()):
+                        with cols[idx % 3]:
+                            if row.画像URL:
+                                st.image(row.画像URL, caption=f"【{row.アカウント}】 いいね:{row.いいね数}")
+        
         except Exception as e:
             st.error(f"エラーが発生しました: {e}")
