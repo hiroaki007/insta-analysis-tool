@@ -18,10 +18,22 @@ st.set_page_config(page_title="Insta Analytics - Insco", layout="wide")
 
 @st.cache_resource
 def get_instagram_client(username, password):
-    """Instagramへのログインを1回だけに制限"""
     cl = Client()
-    cl.delay_range = [1, 3] 
+    session_file = "insta_session.json"
+    
+    # 1. 保存されたセッションがあればそれを読み込む
+    if os.path.exists(session_file):
+        try:
+            cl.load_settings(session_file)
+            cl.login(username, password)
+            return cl
+        except Exception:
+            # セッションが無効なら削除して再ログイン
+            os.remove(session_file)
+
+    # 2. セッションがない場合のみ、新規ログイン
     cl.login(username, password)
+    cl.dump_settings(session_file) # ログイン成功後に情報を保存
     return cl
 
 @st.cache_data(ttl=3600)
