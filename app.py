@@ -69,8 +69,8 @@ def check_password():
             st.error("パスワードが違います")
     return False
 
-if not check_password():
-    st.stop()
+# if not check_password():
+#     st.stop()
 
 # --- 3. メインアプリ画面 ---
 
