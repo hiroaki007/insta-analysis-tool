@@ -17,6 +17,13 @@ def get_client():
     cl.login(USERNAME, PASSWORD)
     return cl
 
+
+@st.cache_data 
+def get_analysis_result(user_id):
+
+    return result
+
+
 # --- パスワード認証機能 ---
 # .envから設定したパスワードを取得
 # 第2引数は、万が一.envに書き忘れた時の「予備」として機能します
