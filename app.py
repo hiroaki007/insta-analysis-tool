@@ -194,4 +194,40 @@ if st.session_state["all_results"] is not None:
                     if row.画像URL: st.image(row.画像URL, caption=f"いいね:{row.いいね数}")
 
 st.divider()
-st.markdown(f'<div style="text-align:center"><p>気に入ったらLINEで完全版へ！</p><a href="YOUR_LINE_URL">LINE登録はこちら</a></div>', unsafe_allow_html=True)
+
+# LINE誘導セクション（HTML/CSS）
+line_html = f"""
+<div style="
+    background-color: #f8f9fa;
+    border: 2px solid #06C755;
+    border-radius: 15px;
+    padding: 25px;
+    text-align: center;
+    margin-top: 20px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+">
+    <h3 style="color: #333; margin-bottom: 10px;">🚀 分析制限を解除しませんか？</h3>
+    <p style="color: #666; font-size: 15px; margin-bottom: 20px;">
+        公式LINEに登録するだけで、<b>完全版アクセスパスワード</b>を即座に発行します。<br>
+        取得件数アップ・CSV保存・複数比較がすべて無料！
+    </p>
+    <a href="https://lin.ee/GKsM8P9" target="_blank" style="text-decoration: none;">
+        <div style="
+            background-color: #06C755;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 18px;
+            display: inline-block;
+            transition: 0.3s;
+        ">
+            ✨ 完全版パスワードを無料で受け取る
+        </div>
+    </a>
+    <p style="color: #999; font-size: 12px; margin-top: 15px;">
+        ※登録後、すぐにメッセージでパスワードが届きます。
+    </p>
+</div>
+"""
+st.markdown(line_html, unsafe_allow_html=True)
