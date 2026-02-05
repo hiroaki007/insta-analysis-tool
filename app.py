@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components
 import pandas as pd
 from instagrapi import Client
 import os 
@@ -13,6 +14,21 @@ PASSWORD = os.getenv("INSTA_PASSWORD")
 MASTER_PASSWORD = os.getenv("APP_ACCESS_PASSWORD", "default_pass")
 
 st.set_page_config(page_title="Insta Analytics - Insco", layout="wide")
+
+# Google Analyticsの測定ID（G-XXXXXXXXXX）
+GA_ID = "G-あなたのID"
+
+# GA4のトラッキングコード
+ga_code = f"""
+    <script async src="https://www.googletagmanager.com/gtag/js?id={GA_ID}"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){{dataLayer.push(arguments);}}
+        gtag('js', new Date());
+        gtag('config', '{GA_ID}');
+    </script>
+"""
+
 
 # --- 1. キャッシュ・リソース管理 ---
 
