@@ -16,7 +16,7 @@ MASTER_PASSWORD = os.getenv("APP_ACCESS_PASSWORD", "default_pass")
 st.set_page_config(page_title="Insta Analytics - Insco", layout="wide")
 
 # Google Analyticsの測定ID（G-XXXXXXXXXX）
-GA_ID = "G-あなたのID"
+GA_ID = "G-REMVLCYMSN"
 
 # GA4のトラッキングコード
 ga_code = f"""
