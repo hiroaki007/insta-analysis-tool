@@ -40,7 +40,7 @@ def get_instagram_client(username, password):
 
     # ブラウザから取得した最新の sessionid をここに入れてください
     # ※コード内に直接書くのが一番確実です
-    MY_SESSION_ID = "80518945892%3A8JmMwEFs2KYO3o%3A6%3AAYiVqQir3aBZ-XPAVNH1bwFPx2jkg9CtgMXSe46YBQ"
+    MY_SESSION_ID = "80518945892:8JmMwEFs2KYO3o:6:AYiVqQir3aBZ-XPAVNH1bwFPx2jkg9CtgMXSe46YBQ"
 
     cl.delay_range = [2, 5]
     
