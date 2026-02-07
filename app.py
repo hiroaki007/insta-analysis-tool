@@ -37,6 +37,8 @@ def get_instagram_client(username, password):
 
     cl.set_proxy("socks5://127.0.0.1:1080")
 
+    session_id = "80518945892%3A8JmMwEFs2KYO3o%3A6%3AAYiVqQir3aBZ-XPAVNH1bwFPx2jkg9CtgMXSe46YBQ"
+
     cl.delay_range = [2, 5]  # 遅延を少し長めに設定
     session_file = "session.json"
 
