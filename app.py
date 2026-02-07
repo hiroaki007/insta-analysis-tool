@@ -32,35 +32,34 @@ components.html(ga_code, height=0)
 # --- 1. Instagramログイン管理 (セッション保存対応) ---
 
 def get_instagram_client(username, password):
-    """セッションファイルを活用してログイン試行回数を最小限にする"""
+    """パスワードを使わず Session ID で直接ログインする"""
     cl = Client()
-
+    
+    # 自宅Macへのトンネル設定
     cl.set_proxy("socks5://127.0.0.1:1080")
 
-    session_id = "80518945892%3A8JmMwEFs2KYO3o%3A6%3AAYiVqQir3aBZ-XPAVNH1bwFPx2jkg9CtgMXSe46YBQ"
+    # ブラウザから取得した最新の sessionid をここに入れてください
+    # ※コード内に直接書くのが一番確実です
+    MY_SESSION_ID = "80518945892%3A8JmMwEFs2KYO3o%3A6%3AAYiVqQir3aBZ-XPAVNH1bwFPx2jkg9CtgMXSe46YBQ"
 
-    cl.delay_range = [2, 5]  # 遅延を少し長めに設定
-    session_file = "session.json"
-
+    cl.delay_range = [2, 5]
+    
     try:
-        if os.path.exists(session_file):
-            st.info("既存のセッションをロード中...")
-            cl.load_settings(session_file)
-            cl.login(username, password)
-            # ログイン状態が生きているか確認
-            cl.get_timeline_feed() 
-        else:
-            st.warning("新規ログインを実行中...")
-            cl.login(username, password)
-            cl.dump_settings(session_file)
+        # パスワードログインを一切行わず、Session IDだけで入る
+        st.info("Session IDを使用して認証中...")
+        cl.login_by_sessionid(MY_SESSION_ID)
+        
+        # 内部エラー防止のため、ユーザー名だけセットしておく
+        cl.username = username
+        
+        # ログインできているか念のためテスト（ユーザー自身の情報を取得）
+        cl.account_info()
+        st.success("セッション認証に成功しました！")
+        
     except Exception as e:
-        st.error(f"ログインエラー: {e}")
-        # セッションファイルが壊れている、またはブロックされている場合は削除して再試行
-        if os.path.exists(session_file):
-            os.remove(session_file)
-        # 強制的に再ログインを試みる（ここで失敗したらIPブロック確定）
-        cl.login(username, password)
-        cl.dump_settings(session_file)
+        st.error(f"セッションログイン失敗: {e}")
+        st.warning("Session IDが期限切れの可能性があります。ブラウザで再取得してください。")
+        return None
         
     return cl
 
